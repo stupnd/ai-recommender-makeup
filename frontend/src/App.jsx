@@ -28,7 +28,14 @@ function App() {
     e.preventDefault();
 
     if (!image) return alert("Please upload an image!");
+    if (selectedTypes.length === 0) return alert("Please select at least one product type!");
 
+    if (!HUGGINGFACE_TOKEN) {
+      alert("Missing API token - check your environment variables");
+      return;
+    }
+
+    try{
     const presignResponse = await fetch(
       "https://7uzyofk8hc.execute-api.us-east-2.amazonaws.com/default/generatePresignedURL",
       {
@@ -64,67 +71,96 @@ function App() {
 
     const productData = [];
     for (const type of selectedTypes) {
-      const res = await fetch(
-        `https://makeup-api.herokuapp.com/api/v1/products.json?product_type=${type}`
-      );
+      const res = await fetch(`https://makeup-api.herokuapp.com/api/v1/products.json?product_type=${type}`);
       const data = await res.json();
-
-      productData.push(
-        ...data.slice(0, 5).map((p) => ({
+      
+      if (data && data.length > 0) {
+        productData.push(...data.slice(0, 5).map(p => ({
           name: p.name,
           brand: p.brand,
           price: p.price,
           type: type,
-          description: p.description || "",
-          link: p.website_link,
-        }))
-      );
+          description: p.description || 'No description available',
+          link: p.website_link
+        })));
+      }
     }
 
-    const aiPrompt = `You are a beauty expert. A user has:
+    if (productData.length === 0) {
+      return alert("No products found for the selected types!");
+    }
+
+    // More explicit prompt with JSON examples
+    const aiPrompt = `[INST] You are a beauty expert recommending makeup products. 
+Provide exactly 3 recommendations in valid JSON format like this:
+[
+  { 
+    "name": "Product Name", 
+    "why": "Brief explanation why this suits the user", 
+    "price": "XX.XX",
+    "type": "product type"
+  }
+]
+
+User details:
 - Skin tone: ${estimatedTone}
 - Skin type: ${skinType}
 - Finish: ${finish}
 - Budget: $${budget}
 - Wants: ${selectedTypes.join(", ")}
 
-Here are 10 makeup products:
-${productData
-  .slice(0, 10)
-  .map(
-    (p, i) =>
-      `${i + 1}. "${p.name}" - ${p.description.slice(0, 60)}... ($${p.price})`
-  )
-  .join("\n")}
+Available products:
+${productData.slice(0, 10).map((p, i) => `${i + 1}. ${p.name} (${p.brand}) - ${p.type} - $${p.price}`).join("\n")}
 
-Pick the best 3 for this user and explain why in simple JSON like:
-[
-  { "name": "____", "why": "____", "price": "$__" }
-]`;
+Recommend exactly 3 products from the list above that best match the user's needs, considering their skin tone, type, preferred finish, and budget.
+Return ONLY the JSON array with 3 items, nothing else. [/INST]`;
 
-    const aiResponse = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${HUGGINGFACE_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: aiPrompt }),
-      }
-    );
+const aiResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${HUGGINGFACE_TOKEN.trim()}`, // .trim() removes any accidental whitespace
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    inputs: aiPrompt,
+    parameters: {
+      return_full_text: false,
+      max_new_tokens: 500
+    }
+  })
+});
+
+if (!aiResponse.ok) {
+  const errorData = await aiResponse.json().catch(() => ({}));
+  throw new Error(
+    `AI request failed: ${aiResponse.status} - ${errorData.error || 'Unknown error'}`
+  );
+}
 
     const aiResult = await aiResponse.json();
-    try {
-      const jsonStart = aiResult[0].generated_text.indexOf("[");
-      const jsonStr = aiResult[0].generated_text.slice(jsonStart);
-      const parsed = JSON.parse(jsonStr);
-      setRecommended(parsed);
-    } catch (err) {
-      console.error("Error parsing AI response:", err);
-      alert("AI recommendation failed.");
+    console.log("Raw AI response:", aiResult); // Debugging
+
+    // Try to find JSON in the response
+    let recommendations = [];
+    if (Array.isArray(aiResult)) {
+      const text = aiResult[0]?.generated_text || '';
+      const jsonMatch = text.match(/\[.*\]/s); // Find first JSON array in response
+      if (jsonMatch) {
+        recommendations = JSON.parse(jsonMatch[0]);
+      }
     }
-  };
+
+    if (recommendations.length === 0) {
+      throw new Error("Could not parse recommendations");
+    }
+
+    setRecommended(recommendations);
+  } catch (err) {
+    console.error("Error in handleSubmit:", err);
+    alert(`Error: ${err.message}`);
+  }
+};
+
 
   return (
     <div
