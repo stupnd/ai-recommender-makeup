@@ -9,7 +9,7 @@ function App() {
   const [budget, setBudget] = useState('');
   const [preview, setPreview] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const HUGGINGFACE_TOKEN = process.env.REACT_APP_HF_TOKEN;
+  const HUGGINGFACE_TOKEN = import.meta.env.VITE_HF_TOKEN;
 
 
   const handleTypeChange = (e) => {
