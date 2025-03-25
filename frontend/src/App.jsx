@@ -75,7 +75,7 @@ function App() {
       const data = await res.json();
       
       if (data && data.length > 0) {
-        productData.push(...data.slice(0, 5).map(p => ({
+        productData.push(...data.slice(0, 8).map(p => ({ // Get 8 products per type now
           name: p.name,
           brand: p.brand,
           price: p.price,
@@ -92,13 +92,13 @@ function App() {
 
     // More explicit prompt with JSON examples
     const aiPrompt = `[INST] You are a beauty expert recommending makeup products. 
-Provide exactly 3 recommendations in valid JSON format like this:
+Provide exactly ${selectedTypes.length * 1} recommendations in valid JSON format (at least 1 per selected type):
 [
   { 
     "name": "Product Name", 
     "why": "Brief explanation why this suits the user", 
     "price": "XX.XX",
-    "type": "product type"
+    "type": "product_type"
   }
 ]
 
@@ -110,11 +110,13 @@ User details:
 - Wants: ${selectedTypes.join(", ")}
 
 Available products:
-${productData.slice(0, 10).map((p, i) => `${i + 1}. ${p.name} (${p.brand}) - ${p.type} - $${p.price}`).join("\n")}
+${productData.slice(0, 15).map((p, i) => `${i + 1}. ${p.name} (${p.brand}) - ${p.type} - $${p.price}`).join("\n")}
 
-Recommend exactly 3 products from the list above that best match the user's needs, considering their skin tone, type, preferred finish, and budget.
-Return ONLY the JSON array with 3 items, nothing else. [/INST]`;
-
+Recommend at least 1 product per selected type (${selectedTypes.join(", ")}), up to ${selectedTypes.length * 1} total products.
+Prioritize products that match the user's skin tone, type, finish preference, and budget. 
+Distribute recommendations evenly across the selected types. If the user selected 3 types, provide at least 1 recommendation per type.
+Return ONLY the JSON array, nothing else. [/INST]`;
+      
 const aiResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
   method: "POST",
   headers: {
@@ -261,25 +263,24 @@ if (!aiResponse.ok) {
       </form>
 
       {recommended.length > 0 && (
-        <div style={{ marginTop: "2rem" }}>
-          <h2>AI's Top Matches ✨</h2>
-          {recommended.map((product, index) => (
-            <div
-              key={index}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "10px",
-                padding: "1rem",
-                marginBottom: "1rem",
-              }}
-            >
-              <h3>{product.name}</h3>
+  <div style={{ marginTop: '2rem' }}>
+    <h2>AI's Top Matches ✨</h2>
+    {selectedTypes.map(type => (
+      <div key={type}>
+        <h3>{type.charAt(0).toUpperCase() + type.slice(1)}</h3>
+        {recommended
+          .filter(product => product.type === type)
+          .map((product, index) => (
+            <div key={index} style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '1rem', marginBottom: '1rem' }}>
+              <h4>{product.name}</h4>
               <p>{product.why}</p>
-              <p>{product.price}</p>
+              <p>Price: {product.price}</p>
             </div>
           ))}
-        </div>
-      )}
+      </div>
+    ))}
+  </div>
+)}
     </div>
   );
 }
