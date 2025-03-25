@@ -1,5 +1,4 @@
-<script src="http://localhost:8097"></script>
-import { useState, useEffect } from "react"; // Added useEffect import
+import { useState } from "react";
 import "./App.css";
 
 function App() {
@@ -12,10 +11,7 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const HUGGINGFACE_TOKEN = import.meta.env.VITE_HF_TOKEN;
-
-  // Removed the MediaSession effect since it was causing issues
-  // and isn't necessary for our functionality
+  const OPENAI_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
   const handleTypeChange = (e) => {
     const { value, checked } = e.target;
@@ -27,7 +23,6 @@ function App() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     setImage(file);
     setPreview(URL.createObjectURL(file));
   };
@@ -59,23 +54,20 @@ function App() {
     setRecommended([]);
 
     try {
-      // Validate inputs
       if (!image) throw new Error("Please upload a clear photo of your face");
       if (selectedTypes.length === 0) throw new Error("Please select at least one product type");
-      if (!HUGGINGFACE_TOKEN) throw new Error("API configuration error");
+      if (!OPENAI_KEY) throw new Error("API configuration error");
       if (!budget || isNaN(budget)) throw new Error("Please enter a valid budget");
 
-      // Get products
       const productData = [];
       for (const type of selectedTypes) {
         const products = await getMakeupProducts(type);
         productData.push(...products);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       if (productData.length === 0) throw new Error("No products found for selected categories");
 
-      // Filter by budget
       const budgetNum = Number(budget);
       const filteredProducts = productData.filter((p) => {
         const priceNum = parseFloat(p.price?.replace(/[^\d.]/g, "")) || 0;
@@ -86,19 +78,13 @@ function App() {
         throw new Error(`No products found within your $${budget} budget`);
       }
 
-      // Prepare AI prompt
-      const aiPrompt = `[INST] As a professional makeup artist, recommend 3-5 products from this list:
-${filteredProducts.map((p, i) => `${i+1}. ${p.brand} ${p.name} (${p.type}) - ${p.price}`).join("\n")}
+      const aiPrompt = `Recommend 3 makeup products from this list:
+${filteredProducts.map((p, i) => `${i + 1}. ${p.brand} ${p.name} (${p.type}) - ${p.price}`).join("\n")}
 
 User Profile:
 - Skin Type: ${skinType}
 - Preferred Finish: ${finish}
 - Budget: $${budget}
-
-Requirements:
-1. Include at least one product from each selected category
-2. Prioritize products matching the user's skin type and finish preference
-3. Stay within budget
 
 Return ONLY a valid JSON array in this format:
 [{
@@ -108,47 +94,34 @@ Return ONLY a valid JSON array in this format:
   "price": "XX.XX",
   "why": "Brief explanation",
   "link": "product_url"
-}]
-[/INST]`;
+  "image": "image_url_here"
+}]`;
 
-      const aiResponse = await fetch(
-        "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${HUGGINGFACE_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            inputs: aiPrompt,
-            parameters: {
-              return_full_text: false,
-              max_new_tokens: 600,
+      const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "You're a friendly and concise makeup recommendation assistant. Respond only in JSON array format with name, brand, type, price, why, and link."
             },
-          }),
-        }
-      );
+            {
+              role: "user",
+              content: aiPrompt
+            }
+          ],
+          temperature: 0.7
+        })
+      });
 
-      if (!aiResponse.ok) {
-        const errorText = await aiResponse.text();
-        throw new Error(`AI API error: ${errorText}`);
-      }
-
-      const aiResult = await aiResponse.json();
-      const responseText = aiResult[0]?.generated_text || "";
-      
-      // Improved JSON parsing
-      let recommendations = [];
-      try {
-        const jsonStart = responseText.indexOf("[");
-        const jsonEnd = responseText.lastIndexOf("]") + 1;
-        if (jsonStart >= 0 && jsonEnd > jsonStart) {
-          recommendations = JSON.parse(responseText.slice(jsonStart, jsonEnd));
-        }
-      } catch (parseError) {
-        console.error("Failed to parse AI response:", parseError);
-        throw new Error("Couldn't understand the AI's recommendations");
-      }
+      const chatData = await aiResponse.json();
+      const content = chatData.choices?.[0]?.message?.content;
+      const recommendations = JSON.parse(content);
 
       if (!Array.isArray(recommendations) || recommendations.length === 0) {
         throw new Error("No valid recommendations received");
@@ -262,7 +235,6 @@ Return ONLY a valid JSON array in this format:
       </form>
 
       {error && <div className="error-message">{error}</div>}
-
       {isLoading && <div className="loading-message">Analyzing your preferences...</div>}
 
       {recommended.length > 0 && (
