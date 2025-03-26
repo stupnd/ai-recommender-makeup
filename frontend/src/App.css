@@ -1,10 +1,10 @@
 :root {
-  --bg-color: #1c1c1c;
+  --bg-color: #c39d9d;
   --text-color: #f4f4f4;
   --primary-color: #a57d5d;
   --accent-color: #d49a6a;
-  --light-panel: #2a2a2a;
-  --hero-gradient: linear-gradient(120deg, #f9f9c5, #d9cbf5, #c4ebff);
+  --light-panel: #685151;
+  --hero-gradient: linear-gradient(120deg, #a5c1db, #a084d8, #051924);
   --button-radius: 999px;
 }
 
@@ -83,7 +83,7 @@ body {
 
 .wizard-form {
   background-color: var(--light-panel);
-  padding: 2rem;
+  padding: 3rem;
   border-radius: 16px;
   width: 100%;
   max-width: 600px;
@@ -99,8 +99,9 @@ body {
 input[type="file"],
 input[type="number"],
 select {
-  width: 100%;
-  padding: 0.8rem;
+  width: 500px;
+  padding: 1rem;
+  border: none;
   border-radius: 10px;
   margin-bottom: 1.2rem;
   border: none;
