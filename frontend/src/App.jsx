@@ -26,6 +26,7 @@ function App() {
   const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
   const formStepsRef = useRef([]);
   const [currentStep, setCurrentStep] = useState(0);
+  
 
   // Example array of step labels
   const stepLabels = ["Photo", "Finish", "Skin", "Budget", "Products"];
@@ -450,7 +451,7 @@ Return in this exact format as a JSON array:
             {error && <div className="error-message">{error}</div>}
           </div>
         </form>
-      </div>
+  
 
       {recommended.length > 0 && (
         <div className="recommendations">
@@ -481,8 +482,9 @@ Return in this exact format as a JSON array:
           </div>
         </div>
       )}
-    </div>
-  );
+      </div>
+      </div>
+  )
 }
 
 export default App;
