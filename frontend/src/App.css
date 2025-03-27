@@ -528,3 +528,50 @@ select option {
   transform: translateY(0);
   height: auto;
 }
+/* Form Navigation */
+.form-navigation {
+  display: flex;
+  justify-content: space-between; /* or 'space-around' or 'flex-end' if you prefer */
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Base styling for both Back & Next buttons */
+.nav-button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--button-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 10px rgba(212, 165, 165, 0.3);
+}
+
+/* Hover effect for both buttons */
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 165, 165, 0.4);
+}
+
+/* "Back" button style */
+.prev-button {
+  background-color: #fff;
+  color: var(--text-color);
+  border: 1px solid var(--accent-color);
+}
+
+/* "Next" button style */
+.next-button {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+/* Disabled state for "Next" button */
+.next-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

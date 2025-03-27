@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { ArrowUpRight } from "lucide-react";
 import "./App.css";
-import { ContainerScrollAnimation } from "./ContainerScrollAnimation"; // Import your custom component
+import { ContainerScrollAnimation } from "./ContainerScrollAnimation"; // Custom scroll animation component
 
 function App() {
   const [showLanding, setShowLanding] = useState(true);
@@ -20,7 +20,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    // Highlight current step
+    // Highlight current step (if needed for styling)
     formStepsRef.current.forEach((step, index) => {
       if (step) {
         if (index === currentStep) {
@@ -51,6 +51,7 @@ function App() {
   const handleFinishChange = (e) => {
     setFinish(e.target.value);
     setTimeout(() => {
+      // Scroll into view if needed
       formStepsRef.current[2]?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
   };
@@ -78,13 +79,11 @@ function App() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check file type
     if (!file.type.match("image.*")) {
       setError("Please upload an image file");
       return;
     }
 
-    // Check file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       setError("File size should be less than 5MB");
       return;
@@ -97,9 +96,12 @@ function App() {
     }, 300);
   };
 
-  const handleNextStep = (stepIndex) => {
-    setCurrentStep(stepIndex + 1);
-    formStepsRef.current[stepIndex + 1]?.scrollIntoView({ behavior: "smooth" });
+  const handleNextStep = () => {
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep((prev) => prev - 1);
   };
 
   const handleStart = () => setShowLanding(false);
@@ -139,10 +141,7 @@ function App() {
             body: JSON.stringify({
               model: "gpt-3.5-turbo",
               messages: [
-                {
-                  role: "system",
-                  content: "You're an expert in search keyword optimization.",
-                },
+                { role: "system", content: "You're an expert in search keyword optimization." },
                 { role: "user", content: keywordPrompt },
               ],
               temperature: 0.5,
@@ -210,10 +209,7 @@ Return in this exact format as a JSON array:
             body: JSON.stringify({
               model: "gpt-3.5-turbo",
               messages: [
-                {
-                  role: "system",
-                  content: "You are a helpful beauty product expert.",
-                },
+                { role: "system", content: "You are a helpful beauty product expert." },
                 { role: "user", content: aiRankingPrompt },
               ],
               temperature: 0.7,
@@ -236,6 +232,77 @@ Return in this exact format as a JSON array:
       setIsLoading(false);
     }
   };
+
+  // Array of step components (each wrapped with ContainerScrollAnimation)
+  const steps = [
+    <ContainerScrollAnimation animation="fadeIn" key="step-0">
+      <div ref={addToRefs} className="form-step">
+        <h3>Upload your photo</h3>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          disabled={isLoading}
+        />
+        {preview && <img src={preview} alt="Preview" className="photo-preview" />}
+      </div>
+    </ContainerScrollAnimation>,
+    <ContainerScrollAnimation animation="fadeIn" key="step-1">
+      <div ref={addToRefs} className="form-step">
+        <h3>What finish do you prefer?</h3>
+        <select value={finish} onChange={handleFinishChange} disabled={isLoading}>
+          <option value="">Preferred Finish</option>
+          <option value="matte">Matte</option>
+          <option value="dewy">Dewy</option>
+          <option value="natural">Natural</option>
+        </select>
+      </div>
+    </ContainerScrollAnimation>,
+    <ContainerScrollAnimation animation="fadeIn" key="step-2">
+      <div ref={addToRefs} className="form-step">
+        <h3>What's your skin type?</h3>
+        <select value={skinType} onChange={handleSkinTypeChange} disabled={isLoading}>
+          <option value="">Skin Type</option>
+          <option value="dry">Dry</option>
+          <option value="oily">Oily</option>
+          <option value="combo">Combination</option>
+          <option value="normal">Normal</option>
+        </select>
+      </div>
+    </ContainerScrollAnimation>,
+    <ContainerScrollAnimation animation="fadeIn" key="step-3">
+      <div ref={addToRefs} className="form-step">
+        <h3>What's your budget?</h3>
+        <input
+          type="number"
+          value={budget}
+          onChange={handleBudgetChange}
+          onBlur={handleBudgetBlur}
+          placeholder="Budget in USD"
+          disabled={isLoading}
+        />
+      </div>
+    </ContainerScrollAnimation>,
+    <ContainerScrollAnimation animation="fadeIn" key="step-4">
+      <div ref={addToRefs} className="form-step">
+        <h3>What products are you looking for?</h3>
+        <div className="checkbox-group">
+          {["foundation", "blush", "lipstick", "eyeshadow"].map((type) => (
+            <label key={type} className="checkbox-label">
+              <input
+                type="checkbox"
+                value={type}
+                checked={selectedTypes.includes(type)}
+                onChange={handleTypeChange}
+                disabled={isLoading}
+              />
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </label>
+          ))}
+        </div>
+      </div>
+    </ContainerScrollAnimation>,
+  ];
 
   if (showLanding) {
     return (
@@ -269,89 +336,17 @@ Return in this exact format as a JSON array:
               {["Photo", "Finish", "Skin", "Budget", "Products"].map((label, index) => (
                 <div
                   key={index}
-                  className={`progress-step ${index === currentStep ? "active" : ""} ${index < currentStep ? "completed" : ""}`}
+                  className={`progress-step ${
+                    index === currentStep ? "active" : ""
+                  } ${index < currentStep ? "completed" : ""}`}
                 >
                   {label}
                 </div>
               ))}
             </div>
 
-            {/* Step 1: Photo Upload */}
-            <ContainerScrollAnimation animation="fadeIn">
-              <div ref={addToRefs} className="form-step">
-                <h3>Upload your photo</h3>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={isLoading}
-                />
-                {preview && <img src={preview} alt="Preview" className="photo-preview" />}
-              </div>
-            </ContainerScrollAnimation>
-
-            {/* Step 2: Finish Preference */}
-            <ContainerScrollAnimation animation="fadeIn">
-              <div ref={addToRefs} className={`form-step ${currentStep === 1 ? "active" : ""}`}>
-                <h3>What finish do you prefer?</h3>
-                <select value={finish} onChange={handleFinishChange} disabled={isLoading}>
-                  <option value="">Preferred Finish</option>
-                  <option value="matte">Matte</option>
-                  <option value="dewy">Dewy</option>
-                  <option value="natural">Natural</option>
-                </select>
-              </div>
-            </ContainerScrollAnimation>
-
-            {/* Step 3: Skin Type */}
-            <ContainerScrollAnimation animation="fadeIn">
-              <div ref={addToRefs} className={`form-step ${currentStep === 2 ? "active" : ""}`}>
-                <h3>What's your skin type?</h3>
-                <select value={skinType} onChange={handleSkinTypeChange} disabled={isLoading}>
-                  <option value="">Skin Type</option>
-                  <option value="dry">Dry</option>
-                  <option value="oily">Oily</option>
-                  <option value="combo">Combination</option>
-                  <option value="normal">Normal</option>
-                </select>
-              </div>
-            </ContainerScrollAnimation>
-
-            {/* Step 4: Budget */}
-            <ContainerScrollAnimation animation="fadeIn">
-              <div ref={addToRefs} className={`form-step ${currentStep === 3 ? "active" : ""}`}>
-                <h3>What's your budget?</h3>
-                <input
-                  type="number"
-                  value={budget}
-                  onChange={handleBudgetChange}
-                  onBlur={handleBudgetBlur}
-                  placeholder="Budget in USD"
-                  disabled={isLoading}
-                />
-              </div>
-            </ContainerScrollAnimation>
-
-            {/* Step 5: Product Types */}
-            <ContainerScrollAnimation animation="fadeIn">
-              <div ref={addToRefs} className={`form-step ${currentStep === 4 ? "active" : ""}`}>
-                <h3>What products are you looking for?</h3>
-                <div className="checkbox-group">
-                  {["foundation", "blush", "lipstick", "eyeshadow"].map((type) => (
-                    <label key={type} className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        value={type}
-                        checked={selectedTypes.includes(type)}
-                        onChange={handleTypeChange}
-                        disabled={isLoading}
-                      />
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </ContainerScrollAnimation>
+            {/* Render only the current step */}
+            {steps[currentStep]}
 
             {/* Navigation buttons */}
             <div className="form-navigation">
@@ -359,17 +354,17 @@ Return in this exact format as a JSON array:
                 <button
                   type="button"
                   className="nav-button prev-button"
-                  onClick={() => setCurrentStep((prev) => prev - 1)}
+                  onClick={handlePrevStep}
                 >
                   Back
                 </button>
               )}
 
-              {currentStep < 4 ? (
+              {currentStep < steps.length - 1 ? (
                 <button
                   type="button"
                   className="nav-button next-button"
-                  onClick={() => setCurrentStep((prev) => prev + 1)}
+                  onClick={handleNextStep}
                   disabled={
                     (currentStep === 0 && !image) ||
                     (currentStep === 1 && !finish) ||
@@ -404,7 +399,9 @@ Return in this exact format as a JSON array:
                 {product.image && (
                   <img src={product.image} alt={product.name} className="product-img" />
                 )}
-                <h3>{product.brand} {product.name}</h3>
+                <h3>
+                  {product.brand} {product.name}
+                </h3>
                 <p>{product.price}</p>
                 <p>{product.why}</p>
                 {product.link && (
