@@ -6,7 +6,8 @@
   --light-panel: rgba(255, 255, 255, 0.8);
   --glass-bg: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(255, 255, 255, 0.2);
-  --hero-gradient: linear-gradient(120deg, #f0ece9, #f7d8c4, #f0ece9);
+  --hero-gradient: linear-gradient(120deg, #f0ece9 0%, #f7d8c4 100%);
+
   --button-radius: 20px;
   --card-glow: 0 4px 24px rgba(217, 156, 136, 0.4);
   --transition: all 0.3s ease;
@@ -42,6 +43,9 @@ body {
   justify-content: center;     /* Center vertically */
   position: relative;          /* If you want absolute-positioned icons */
   background: var(--hero-gradient); /* Or let body handle the background */
+  max-width: 1200px;    /* or 1000px, 800px, etc. */
+  margin: 0 auto;       /* center horizontally */
+  padding: 2rem;        /* optional spacing */
 }
 
 
@@ -150,12 +154,15 @@ p {
   width: 100%;
   max-width: 1200px;
   padding: 2rem 1rem;
+  max-width: 600px;     /* narrower container for the form if you like */
+  margin: 2rem auto;   
 }
 
 .wizard-illustration img {
   max-width: 300px;
   height: auto;
   margin-bottom: 2rem;
+  border-radius: 12px;
 }
 
 .wizard-form {
@@ -169,6 +176,7 @@ p {
   max-width: 600px;
   width: 100%;
   margin: 2rem auto;
+  
 }
 
 /* Form Elements */
@@ -346,6 +354,9 @@ select option {
   padding: 0 1rem;
   text-align: center;
   width: 100%;
+  max-width: 1200px;
+  margin: 3rem auto;    /* center horizontally and add vertical margin */
+  text-align: center;  
 }
 
 .recommendations h2 {
@@ -354,9 +365,18 @@ select option {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   width: 100%;
+  /* Each card is at least 280px wide, but you can adjust this number */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+
+/* For smaller screens (below ~768px), switch to fewer columns */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
 }
 
 .product-card {
