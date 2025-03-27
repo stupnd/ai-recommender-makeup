@@ -2,6 +2,14 @@ import { useRef, useState, useEffect } from "react";
 import { ArrowUpRight } from "lucide-react";
 import "./App.css";
 import { ContainerScrollAnimation } from "./ContainerScrollAnimation"; // Custom scroll animation component
+import { 
+  Droplet, 
+  Brush, 
+  PaletteIcon, 
+  Palette,
+  Gem
+} from 'lucide-react';
+
 
 function App() {
   const [showLanding, setShowLanding] = useState(true);
@@ -18,6 +26,18 @@ function App() {
   const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
   const formStepsRef = useRef([]);
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Example array of step labels
+  const stepLabels = ["Photo", "Finish", "Skin", "Budget", "Products"];
+
+  const handleStepClick = (stepIndex) => {
+
+    if (stepIndex <= currentStep) {
+      setCurrentStep(stepIndex);
+     }
+  };
+   // Calculate progress as a percentage
+   const progressPercentage = ((currentStep + 1) / stepLabels.length) * 100;
 
   useEffect(() => {
     // Highlight current step (if needed for styling)
@@ -178,7 +198,7 @@ function App() {
 - Finish: ${finish}
 - Budget: $${budget}
 
-Pick the 2 best ${type} products from this list:
+Pick the 2 best ${type} products from this list, make sure that the product is the type that the user chose like if the user chose lipstick, blush, foundation, and eyeshadow, i only want you to recommend that nothing like setting spray or anything. i had to be the mathching product.:
 ${products
   .map(
     (p, i) =>
@@ -306,15 +326,47 @@ Return in this exact format as a JSON array:
 
   if (showLanding) {
     return (
-      <div className="landing-page">
-        <div className="landing-card">
+      <div className="body">
+        {/* Decorative 3D Makeup Elements */}
+        <div className="makeup-icon droplet-icon">
+          <Droplet className="icon-=droplet" />
+        </div>
+        <div className="makeup-icon brush-icon">
+          <Brush className="icon-brush" />
+        </div>
+        <div className="makeup-icon paletteicon-icon">
+          <PaletteIcon className="icon-paletteicon" />
+        </div>
+        <div className="makeup-icon palette-icon">
+          <Palette className="icon-palette" />
+        </div>
+
+        {/* Subtle Gem/Sparkle Elements */}
+        <div className="gem-icon gem1">
+          <Gem className="icon-gem" />
+        </div>
+        <div className="gem-icon gem2">
+          <Gem className="icon-gem" />
+        </div>
+
+        {/* Landing Card */}
+        <div className="landing-card relative z-10 text-center">
           <h1>
-            Explore<br />Your Shade<br /><span>& Confidence ✻</span><br />With <span>Ease</span>
+            Explore<br />Your Shade<br />
+            <span className="text-accent font-semibold">& Confidence ✻</span><br />
+            With <span className="text-primary">Ease</span>
           </h1>
-          <button className="start-button" onClick={handleStart}>
+          <button 
+            className="start-button"
+            onClick={handleStart}
+          >
             Start Your Journey
           </button>
         </div>
+
+        {/* Decorative Blobs for Soft Background */}
+        <div className="decorative-blob blob-1" />
+        <div className="decorative-blob blob-2" />
       </div>
     );
   }
@@ -329,21 +381,31 @@ Return in this exact format as a JSON array:
         <form onSubmit={handleSubmit} className="wizard-form">
           <div className="wizard-content">
             <h2 className="fade-in">Find Your Perfect Match </h2>
-            <div className="glow-blob"></div>
+             {/* Progress Steps + Clickable Labels */}
+      <div className="progress-steps">
+        {stepLabels.map((label, index) => (
+          <div
+            key={index}
+            className={`progress-step ${
+              index === currentStep ? "active" : ""
+            } ${index < currentStep ? "completed" : ""}`}
+            onClick={() => handleStepClick(index)}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
 
-            {/* Progress indicator */}
-            <div className="progress-steps">
-              {["Photo", "Finish", "Skin", "Budget", "Products"].map((label, index) => (
-                <div
-                  key={index}
-                  className={`progress-step ${
-                    index === currentStep ? "active" : ""
-                  } ${index < currentStep ? "completed" : ""}`}
-                >
-                  {label}
-                </div>
-              ))}
+      {/* Progress Bar */}
+      <div className="progress-bar-container">
+        <div
+          className="progress-bar-fill"
+          style={{ width: `${progressPercentage}%` }}
+        ></div>
             </div>
+                
+
+            
 
             {/* Render only the current step */}
             {steps[currentStep]}

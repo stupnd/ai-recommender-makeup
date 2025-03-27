@@ -11,19 +11,32 @@
   --card-glow: 0 4px 24px rgba(217, 156, 136, 0.4);
   --transition: all 0.3s ease;
 }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
+  background: var(--hero-gradient);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   color: var(--text-color);
+
+  /* Fill the screen */
   min-height: 100vh;
+
+  /* Flexbox to center the card horizontally & vertically */
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: center;       /* Center horizontally */
+  justify-content: center;   /* Center vertically */
+
   line-height: 1.6;
 }
+
 
 /* Typography Improvements */
 h1, h2, h3 {
@@ -50,17 +63,25 @@ p {
   opacity: 0.9;
 }
 
-/* Landing Page Improvements */
 .landing-page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  width: 100%;
   background: var(--hero-gradient);
-  padding: 2rem;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
+  margin: 0;        /* Remove any default margin */
+  padding: 2rem;    /* Or 0, if you want no extra padding */
 }
+
+
+
 
 .landing-card {
   text-align: center;
@@ -74,6 +95,13 @@ p {
   z-index: 1;
   backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
+  background: var(--light-panel);
+  border-radius: 24px;
+  box-shadow: var(--card-glow);
+  padding: 3rem 2rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
 }
 
 .landing-card h1 {
@@ -147,7 +175,20 @@ label {
   color: var(--text-color);
 }
 
-input[type="file"],
+input[type="file"] {
+  /* Ensure padding on all sides */
+  padding: 0.6rem 1rem;
+  /* Make sure the element respects padding for its total width/height */
+  box-sizing: border-box;
+  /* Optional: adjust font-size or line-height for more breathing room */
+  font-size: 1rem;
+  line-height: 1.2;
+  /* Keep consistent border and rounding if desired */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--button-radius);
+  background-color: #fff;
+}
+
 input[type="number"],
 select {
   width: 100%;
@@ -574,4 +615,365 @@ select option {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+/* Progress Bar Container */
+.progress-bar-container {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #eee; /* or another neutral color */
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+/* The fill that grows to show progress */
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 8px;
+  background: var(--accent-color); /* or another highlight color */
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* If you want some spacing for the steps vs the bar */
+.progress-steps {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem; /* reduce or increase as needed */
+  flex-wrap: wrap;
+}
+
+/* Example .progress-step styles (clickable circles or pills) */
+.progress-step {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Active step styling */
+.progress-step.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+/* Steps that have been passed (completed) */
+.progress-step.completed {
+  background: rgba(212, 165, 165, 0.3);
+}
+/* Shared styling for all blobs */
+.decorative-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);           /* Soft blur for a glowing effect */
+  opacity: 0.2;                  /* Lower opacity for subtlety */
+  animation: float 6s ease-in-out infinite alternate;
+  z-index: 0;                    /* Behind the card */
+}
+
+/* Example: Blob 1 in top-left corner */
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  left: -100px;
+  background: var(--accent-color);
+}
+
+/* Example: Blob 2 in bottom-right corner */
+.blob-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  right: -150px;
+  background: var(--primary-color);
+}
+
+/* A simple float animation */
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(30px, 30px);
+  }
+}
+/* 1) Main container if you want it to fill screen & position icons absolutely */
+.landing-page-with-icons {
+  position: relative; 
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  overflow: hidden; /* so icons won't scroll outside container */
+}
+
+/* 2) Common classes for your icon containers */
+.makeup-icon, .gem-icon {
+  position: absolute; 
+  opacity: 0.3; /* Or 0.4, etc. Adjust as you like */
+  transition: transform 0.3s ease;
+}
+
+.makeup-icon:hover,
+.gem-icon:hover {
+  transform: scale(1.1);
+  z-index: 2; /* bring icon above others on hover */
+}
+
+/* 3) Specific positions for each icon (tweak as desired) */
+
+/* Lipstick icon: top: 20px; left: 10px; rotate -12deg */
+.lipstick-icon {
+  top: 80px; /* ~20px from top, adjust for your design */
+  left: 40px;
+  transform: rotate(-12deg);
+  opacity: 0.3;
+}
+
+/* Brush icon: bottom: 20px; right: 10px; rotate 12deg */
+.brush-icon {
+  bottom: 80px;
+  right: 40px;
+  transform: rotate(12deg);
+  opacity: 0.3;
+}
+
+/* PaletteIcon: top: 10px; right: 20px; rotate -6deg */
+.paletteicon-icon {
+  top: 40px;
+  right: 80px;
+  transform: rotate(-6deg);
+  opacity: 0.4;
+}
+
+/* Palette: bottom: 10px; left: 20px; rotate 6deg */
+.palette-icon {
+  bottom: 40px;
+  left: 80px;
+  transform: rotate(6deg);
+  opacity: 0.4;
+}
+
+/* 4) Gems with a subtle pulse animation */
+.gem-icon {
+  animation: pulseGem 2s infinite alternate;
+}
+
+/* Example positions for gem1 & gem2 */
+.gem1 {
+  top: 30%;
+  left: 25%;
+  transform: rotate(-45deg);
+  opacity: 0.5;
+}
+.gem2 {
+  bottom: 30%;
+  right: 25%;
+  transform: rotate(45deg);
+  opacity: 0.5;
+  animation-delay: 0.5s; /* offset the pulse for variety */
+}
+
+/* 5) Icon color & size using classes or inline style */
+.icon-lipstick, 
+.icon-brush,
+.icon-paletteicon,
+.icon-palette,
+.icon-gem {
+  color: #905d5d; /* default color for all icons, override if needed */
+  width: 80px;
+  height: 80px;
+  /* drop-shadow equivalent in plain CSS */
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+
+/* If you want different colors per icon, override them: */
+.icon-brush {
+  color: #e1a07a;
+  width: 90px;
+  height: 90px;
+}
+.icon-paletteicon {
+  color: #d9a19c;
+  width: 70px;
+  height: 70px;
+}
+.icon-palette {
+  color: #905d5d;
+  width: 60px;
+  height: 60px;
+}
+.icon-gem {
+  color: #e1a07a; /* can override for gem2 below if you want a different color */
+  width: 40px;
+  height: 40px;
+}
+.gem2 .icon-gem {
+  color: #d9a19c;
+  width: 50px;
+  height: 50px;
+}
+
+/* 6) Pulse animation for gems */
+@keyframes pulseGem {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.2);
+  }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes float-delay {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+@keyframes sparkle {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+@keyframes blob {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+@keyframes float-rotate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float-delay {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes sparkle {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes blob {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes float-rotate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-sparkle {
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.animate-sparkle-delay {
+  animation: sparkle 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animate-float-rotate {
+  animation: float-rotate 5s ease-in-out infinite;
+}
+
+.animate-float-rotate-delay {
+  animation: float-rotate 6s ease-in-out infinite;
+  animation-delay: 1s;
+}
+/* Animation Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float-delay {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes sparkle {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.3; transform: scale(0.8); }
+}
+
+@keyframes blob {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes float-rotate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Animation Classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-sparkle {
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.animate-sparkle-delay {
+  animation: sparkle 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animate-float-rotate {
+  animation: float-rotate 5s ease-in-out infinite;
+}
+
+.animate-float-rotate-delay {
+  animation: float-rotate 6s ease-in-out infinite;
+  animation-delay: 1s;
 }
