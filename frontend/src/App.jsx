@@ -327,7 +327,7 @@ Return in this exact format as a JSON array:
 
   if (showLanding) {
     return (
-      <div className="body">
+      <div className="landing-hero">
         {/* Decorative 3D Makeup Elements */}
         <div className="makeup-icon droplet-icon">
           <Droplet className="icon-=droplet" />

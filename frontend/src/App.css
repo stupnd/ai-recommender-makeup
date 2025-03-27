@@ -34,6 +34,16 @@ body {
 
   line-height: 1.6;
 }
+.landing-hero {
+  min-height: 100vh;           /* Fill the viewport height */
+  display: flex;
+  flex-direction: column;      /* If you want icons above/below the card */
+  align-items: center;         /* Center horizontally */
+  justify-content: center;     /* Center vertically */
+  position: relative;          /* If you want absolute-positioned icons */
+  background: var(--hero-gradient); /* Or let body handle the background */
+}
+
 
 
 /* Typography Improvements */
